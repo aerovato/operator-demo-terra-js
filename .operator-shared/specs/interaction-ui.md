@@ -22,7 +22,7 @@
 ## Texture Atlas (`src/atlas.ts`)
 
 - 256x256 canvas, 16x16 tiles of 16px, `NearestFilter`, sRGB. Tile indices are fixed by contract (0 grass top, 1 dirt, 2 grass side, 3 stone, 4 sand, 5 water, 6-11 log top/side pairs, 12 leaves, 13 planks, 14 glass, 15 brick) and mirrored by `BlockDef.tiles`.
-- Texture packs: `?pack=<name>` loads `public/textures/<name>/manifest.json` (tile-name -> 16x16 png mapping, see `public/textures/example-pack/`); missing tiles fall back to procedural; load failure falls back entirely. Default is fully procedural.
+- Texture packs: `?pack=<name>` loads `public/textures/<name>/manifest.json` (tile-name -> 16x16 png mapping, see `public/textures/example-pack/`); missing tiles fall back to procedural; load failure falls back entirely. `grass_side`/`grass_top` are transparent overlays: pack dirt is painted underneath before compositing them (procedural dirt base remains when the pack has no dirt tile).
 
 ## UI (`src/ui.ts`)
 

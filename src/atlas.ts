@@ -61,17 +61,46 @@ export async function loadAtlas(packName: string | null): Promise<Atlas> {
       const atlas = buildAtlas();
       const ctx = atlas.canvas.getContext('2d')!;
       ctx.imageSmoothingEnabled = false;
-      await Promise.all(TILE_NAMES.map(async (name, index) => {
+      // Decode every pack tile first so overlay tiles can composite over others.
+      const images = new Map<TileName, HTMLImageElement>();
+      await Promise.all(TILE_NAMES.map(async (name) => {
         const file = manifest.tiles[name];
         if (!file) return;
         const img = new Image();
         img.src = `textures/${packName}/${file}`;
         await img.decode();
+        images.set(name, img);
+      }));
+      const drawTile = (name: TileName, index: number): void => {
+        const img = images.get(name);
+        if (!img) return;
         const tx = (index % GRID) * TILE;
         const ty = Math.floor(index / GRID) * TILE;
-        ctx.clearRect(tx, ty, TILE, TILE);
         ctx.drawImage(img, tx, ty, TILE, TILE);
-      }));
+      };
+      const clearTile = (index: number): void => {
+        ctx.clearRect(index % GRID * TILE, Math.floor(index / GRID) * TILE, TILE, TILE);
+      };
+      const tileIndexOf = (name: TileName): number => TILE_NAMES.indexOf(name);
+      // grass_side / grass_top are transparent overlays meant to sit on dirt:
+      // paint dirt underneath before drawing them (procedural dirt remains otherwise).
+      const hasDirt = images.has('dirt');
+      const grassSideIndex = tileIndexOf('grass_side');
+      const grassTopIndex = tileIndexOf('grass_top');
+      clearTile(grassSideIndex);
+      if (hasDirt) drawTile('dirt', grassSideIndex);
+      drawTile('grass_side', grassSideIndex);
+      if (hasDirt && images.has('grass_top')) {
+        clearTile(grassTopIndex);
+        drawTile('dirt', grassTopIndex);
+        drawTile('grass_top', grassTopIndex);
+      }
+      for (const [name, index] of TILE_NAMES.map((n, i): [TileName, number] => [n, i])) {
+        if (name === 'grass_side' || name === 'grass_top') continue;
+        if (!images.has(name)) continue;
+        clearTile(index);
+        ctx.drawImage(images.get(name)!, index % GRID * TILE, Math.floor(index / GRID) * TILE, TILE, TILE);
+      }
       atlas.texture.needsUpdate = true;
       console.log(`texture pack loaded: ${manifest.name ?? packName}`);
       return atlas;

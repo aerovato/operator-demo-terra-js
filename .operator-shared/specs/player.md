@@ -10,7 +10,7 @@
 - Fly toggle: F (requires pointer lock). Fly 12 / sprint-fly 25, Space up, Ctrl down, zero gravity.
 - Pointer lock: click canvas to lock; mouse move -> yaw/pitch (0.0022 sens, pitch clamped); keys cleared on unlock.
 - Safety: falling below y=-10 respawns at column surface.
-- Spawn waits for chunk (0,0), then places player one block above `World.surfaceHeight`.
+- Spawn spirals out from origin (8 samples/ring, up to 16 chunks) for a column with surface >= SEA_LEVEL + 1; retries as chunks stream in. Places player one block above `World.surfaceHeight`.
 
 ## Wiring
 

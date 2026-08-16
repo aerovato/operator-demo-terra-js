@@ -156,8 +156,12 @@ export class Game {
         this.player.flying = this.save.player.flying;
         this.camera.position.set(this.save.player.x, this.save.player.y + 1.62, this.save.player.z);
       } else if (!this.spawned) {
-        // Retry dry-land spawn as chunks stream in (spawn fails while candidate rings are unloaded).
-        if (this.player.spawn(0.5, 0.5)) this.spawned = true;
+        // Spawn search uses seeded terrain height directly, so the first attempt succeeds.
+        if (this.player.spawn(0.5, 0.5)) {
+          this.spawned = true;
+          // Move the camera now so chunk streaming re-centers on the spawn point.
+          this.camera.position.set(this.player.position.x, this.player.position.y + 1.62, this.player.position.z);
+        }
       }
     }
   }

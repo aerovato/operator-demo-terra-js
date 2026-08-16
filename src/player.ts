@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BLOCKS, Block } from './blocks';
 import { World } from './world/world';
+import { SEA_LEVEL, terrainHeight } from './world/worldgen';
 
 const WIDTH = 0.6;
 const HEIGHT = 1.8;
@@ -59,39 +60,46 @@ export class Player {
     const found = this.findLandColumn(x, z);
     if (!found) return false;
     this.position.set(found.x, 0, found.z);
-    this.position.y = this.world.surfaceHeight(Math.floor(found.x), Math.floor(found.z)) + 1;
+    this.position.y = terrainHeight(this.world.seed, Math.floor(found.x), Math.floor(found.z)) + 1;
     this.velocity.set(0, 0, 0);
     return true;
   }
 
   /**
-   * Finds a spawnable dry-land column by spiraling out from (x, z) up to 16 chunks.
-   * Returns null while candidate chunks are still streaming in (caller retries);
-   * a column is spawnable when its surface sits above sea level.
+   * Finds a spawnable dry-land column by spiraling out from (x, z), sampling the
+   * seeded terrain height directly (no chunk loading needed). A column is
+   * spawnable when its surface sits above sea level. Returns the origin only as
+   * a last resort when no dry land exists within the search radius.
    */
   private findLandColumn(x: number, z: number): { x: number; z: number } | null {
-    const minSurface = 29; // SEA_LEVEL + 1: dry land only
-    const loaded = (wx: number, wz: number): boolean =>
-      this.world.chunkAt(Math.floor(wx / 16), Math.floor(wz / 16)) !== undefined;
-    const tryColumn = (wx: number, wz: number): boolean =>
-      this.world.surfaceHeight(Math.floor(wx), Math.floor(wz)) >= minSurface;
+    const minSurface = SEA_LEVEL + 1; // dry land only
+    const isLand = (wx: number, wz: number): boolean =>
+      terrainHeight(this.world.seed, Math.floor(wx), Math.floor(wz)) >= minSurface;
 
-    if (tryColumn(x, z)) return { x: x + 0.5, z: z + 0.5 };
+    if (isLand(x, z)) return { x: x + 0.5, z: z + 0.5 };
 
-    let anyLoaded = false;
-    for (let ring = 1; ring <= 16; ring++) {
-      const r = ring * 16;
-      // Sample 8 points per ring; wait until the ring's chunks are loaded before testing.
-      for (let i = 0; i < 8; i++) {
-        const angle = (i / 8) * Math.PI * 2 + ring * 0.5;
-        const wx = Math.floor(x + Math.cos(angle) * r);
-        const wz = Math.floor(z + Math.sin(angle) * r);
-        if (!loaded(wx, wz)) continue;
-        anyLoaded = true;
-        if (tryColumn(wx, wz)) return { x: wx + 0.5, z: wz + 0.5 };
+    // Square rings expanding by STEP blocks; test every column on the ring edge.
+    const STEP = 8;
+    const MAX_RADIUS = 512;
+    for (let ring = 1; ring * STEP <= MAX_RADIUS; ring++) {
+      const r = ring * STEP;
+      for (let i = 0; i <= ring * 8; i++) {
+        // Interleave edges: cycle through the 4 sides, walking each ring edge in ring*2 steps.
+        const side = i & 3;
+        const t = Math.floor(i / 4);
+        const tMax = ring * 2;
+        if (t > tMax) break;
+        const off = -r + Math.floor((t / tMax) * r * 2);
+        let wx = x;
+        let wz = z;
+        if (side === 0) { wx += r; wz += off; }
+        else if (side === 1) { wx -= r; wz += off; }
+        else if (side === 2) { wx += off; wz += r; }
+        else { wx += off; wz -= r; }
+        if (isLand(wx, wz)) return { x: Math.floor(wx) + 0.5, z: Math.floor(wz) + 0.5 };
       }
     }
-    return anyLoaded ? { x: x + 0.5, z: z + 0.5 } : null;
+    return { x: x + 0.5, z: z + 0.5 };
   }
 
   private blockAt(x: number, y: number, z: number): Block {

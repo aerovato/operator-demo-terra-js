@@ -18,7 +18,7 @@
 
 ## Spawn Rules
 
-- New worlds spawn on dry land: `Player.findLandColumn` spirals out (8 samples/ring, 16 rings) for a column whose surface is above sea level. While candidate chunks are still streaming, spawn returns false and `Game` retries on each chunk load. Falls back to the raw spot only when scanned rings are loaded and none qualify.
+- New worlds spawn on dry land: `Player.findLandColumn` walks expanding square rings (STEP 8, up to radius 512) testing `terrainHeight(seed, x, z) >= SEA_LEVEL + 1` directly — no chunk loading needed, so the first spawn attempt succeeds (camera re-centers on the spawn point so streaming follows). Falls back to the raw origin only when no dry land exists in range. Until the spawn chunk streams in, physics may fall through; the y<-10 respawn safety self-heals this.
 
 ## Underwater Ambiance
 

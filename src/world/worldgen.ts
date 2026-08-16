@@ -35,9 +35,11 @@ class WorldGenerator {
   heightAt(x: number, z: number): number {
     const s = 0.0022;
     const continentN = this.continent.fbm(x * s, z * s, 4);
-    // Push toward coasts: below ~-0.08 is ocean basin, above ~0.35 inland plateau.
-    const land = Math.max(0, continentN + 0.08);
-    let h = SEA_LEVEL + land * land * 52 - 6;
+    // Push toward coasts: below ~-0.15 is ocean basin, above ~0.15 inland lowlands.
+    // Linear ramp: squaring the land term starved dry land (~3% of the world) and
+    // made dry-land spawn candidates almost never exist.
+    const land = Math.max(0, continentN + 0.15);
+    let h = SEA_LEVEL + land * 30 - 4;
 
     // Mountains only inland, modulated by roughness noise.
     const inland = Math.max(0, continentN - 0.1);
@@ -172,4 +174,17 @@ export function generateChunk(seed: number, cx: number, cz: number): Uint8Array 
     generators.set(seed, gen);
   }
   return gen.generateChunk(cx, cz);
+}
+
+/**
+ * Terrain height for a column without loading or generating any chunk.
+ * Deterministic per seed; used for spawn-point search on the main thread.
+ */
+export function terrainHeight(seed: number, x: number, z: number): number {
+  let gen = generators.get(seed);
+  if (!gen) {
+    gen = new WorldGenerator(seed);
+    generators.set(seed, gen);
+  }
+  return Math.floor(gen.heightAt(x, z));
 }
