@@ -1,0 +1,15 @@
+{
+  "name": "CC0 Block Textures (ARoachIFoundOnMyPillow, opengameart.org, CC0)",
+  "tiles": {
+    "grass_top": "grass_top.png",
+    "dirt": "dirt.png",
+    "grass_side": "grass_side.png",
+    "stone": "stone.png",
+    "sand": "sand.png",
+    "oak_log_top": "oak_log_top.png",
+    "oak_log_side": "oak_log_side.png",
+    "spruce_log_top": "spruce_log_top.png",
+    "spruce_log_side": "spruce_log_side.png",
+    "leaves": "leaves.png"
+  }
+}

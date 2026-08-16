@@ -1,0 +1,6 @@
+Source: "16*16 Block Textures" by ARoachIFoundOnMyPillow
+https://opengameart.org/content/1616-block-textures
+License: CC0 (creativecommons.org/publicdomain/zero/1.0/)
+
+Tiles water, glass, planks, brick, birch deliberately absent; the engine
+falls back to procedural textures for unmapped tiles.

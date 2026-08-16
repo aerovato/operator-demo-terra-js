@@ -1,0 +1,21 @@
+{
+  "name": "Baunilha by mirtilo (codeberg.org/mirtilo/Baunilha), CC-BY-SA-4.0",
+  "tiles": {
+    "grass_top": "grass_top.png",
+    "dirt": "dirt.png",
+    "grass_side": "grass_side.png",
+    "stone": "stone.png",
+    "sand": "sand.png",
+    "water": "water.png",
+    "oak_log_top": "oak_log_top.png",
+    "oak_log_side": "oak_log_side.png",
+    "birch_log_top": "birch_log_top.png",
+    "birch_log_side": "birch_log_side.png",
+    "spruce_log_top": "spruce_log_top.png",
+    "spruce_log_side": "spruce_log_side.png",
+    "leaves": "leaves.png",
+    "planks": "planks.png",
+    "glass": "glass.png",
+    "brick": "brick.png"
+  }
+}
