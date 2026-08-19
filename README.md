@@ -4,7 +4,7 @@
 
 Terra JS is a browser voxel sandbox (Minecraft-like) built with Three.js +
 TypeScript. It was created as a live demonstration of
-[Operator](https://github.com/aerovato/operator) — a durable documentation and
+[Operator](https://github.com/aerovato/operator-memory) — a durable documentation and
 agent-driven development framework — showing what an AI agent can plan, build,
 document, and maintain autonomously over a multi-day project.
 
